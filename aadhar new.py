@@ -177,6 +177,201 @@ else:
         print("THANK YOU")
 
 
+
+import mysql.connector
+
+# Create a connection to the MySQL database
+conn = mysql.connector.connect(
+    host="your_host",
+    user="your_user",
+    password="your_password",
+    database="aadhar_db"
+)
+cursor = conn.cursor()
+
+# Create a table to store Aadhar information
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS aadhar (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255),
+        gender VARCHAR(10),
+        aadhar_number BIGINT,
+        address TEXT,
+        phone_number BIGINT
+    )
+''')
+
+def create():
+    while True:
+        name = input("Enter the name: ")
+        gender = input("Enter the gender: ")
+        aadhar_no = int(input("Enter the Aadhar number: "))
+        address = input("Enter the address: ")
+        phone_no = int(input("Enter the phone number: "))
+
+        # Insert the data into the database
+        cursor.execute("INSERT INTO aadhar (name, gender, aadhar_number, address, phone_number) VALUES (%s, %s, %s, %s, %s)",
+                       (name, gender, aadhar_no, address, phone_no))
+        conn.commit()
+
+        c = input("Do you want to continue? (y/n): ")
+        if c in 'nN':
+            break
+
+def search():
+    option2 = input("Enter your Aadhar number: ")
+    cursor.execute("SELECT * FROM aadhar WHERE aadhar_number = %s", (option2,))
+    result = cursor.fetchone()
+    if result:
+        print("Your details are:")
+        print("NAME:", result[1])
+        print("GENDER:", result[2])
+        print("AADHAR NUMBER:", result[3])
+        print("ADDRESS:", result[4])
+        print("PHONE NUMBER:", result[5])
+    else:
+        print("Aadhar number not found.")
+
+def display():
+    cursor.execute("SELECT * FROM aadhar")
+    for row in cursor.fetchall():
+        print(row)
+
+def update():
+    option = input("Enter the Aadhar number to be searched: ")
+    cursor.execute("SELECT * FROM aadhar WHERE aadhar_number = %s", (option,))
+    result = cursor.fetchone()
+    if result:
+        while True:
+            option2 = input("Enter the information to be updated (NAME/GENDER/AADHAR NUMBER/ADDRESS/PHONE NUMBER): ")
+            if option2.upper() == 'NAME':
+                change = input("Enter the name to be updated: ")
+                cursor.execute("UPDATE aadhar SET name = %s WHERE aadhar_number = %s", (change, option))
+                conn.commit()
+            elif option2.upper() == 'GENDER':
+                change = input("Enter the gender to be updated: ")
+                cursor.execute("UPDATE aadhar SET gender = %s WHERE aadhar_number = %s", (change, option))
+                conn.commit()
+            elif option2.upper() == 'AADHAR NUMBER':
+                change = int(input("Enter the Aadhar number to be updated: "))
+                cursor.execute("UPDATE aadhar SET aadhar_number = %s WHERE aadhar_number = %s", (change, option))
+                conn.commit()
+            elif option2.upper() == 'ADDRESS':
+                change = input("Enter the address to be updated: ")
+                cursor.execute("UPDATE aadhar SET address = %s WHERE aadhar_number = %s", (change, option))
+                conn.commit()
+            elif option2.upper() == 'PHONE NUMBER':
+                change = int(input("Enter the phone number to be updated: "))
+                cursor.execute("UPDATE aadhar SET phone_number = %s WHERE aadhar_number = %s", (change, option))
+                conn.commit()
+            else:
+                break
+    else:
+        print("Aadhar number not found.")
+
+def delete():
+    option = input("Enter the Aadhar number to be deleted: ")
+    cursor.execute("DELETE FROM aadhar WHERE aadhar_number = %s", (option,))
+    conn.commit()
+    if cursor.rowcount > 0:
+        print("Aadhar number deleted.")
+    else:
+        print("Aadhar number not found.")
+
+def add():
+    while True:
+        option = input("Enter your Aadhar number: ")
+        cursor.execute("SELECT * FROM aadhar WHERE aadhar_number = %s", (option,))
+        result = cursor.fetchone()
+        if result:
+            print("Aadhar number already exists. Your information:")
+            print("NAME:", result[1])
+            print("GENDER:", result[2])
+            print("AADHAR NUMBER:", result[3])
+            print("ADDRESS:", result[4])
+            print("PHONE NUMBER:", result[5])
+        else:
+            name = input("Enter your name: ")
+            gender = input("Enter your gender: ")
+            aadhar_no = int(input("Enter your Aadhar number: "))
+            address = input("Enter your address: ")
+            phone_no = int(input("Enter your phone number: "))
+
+            cursor.execute("INSERT INTO aadhar (name, gender, aadhar_number, address, phone_number) VALUES (%s, %s, %s, %s, %s)",
+                           (name, gender, aadhar_no, address, phone_no))
+            conn.commit()
+            print("Information added successfully.")
+
+        c = input("Do you want to continue? (y/n): ")
+        if c in 'nN':
+            break
+
+print("WELCOME TO THE AADHAR PORTAL","\n")
+user = input("Are you the admin? (y/n): ")
+if user in "yY":
+    login_id = input("Enter the login id: ")
+    password = input("Enter your password: ")
+    if login_id == 'ADMIN' and password == '21aadhar':
+        print("----you have successfully logged in----","\n")
+        print("****WELCOME ADMIN****","\n")
+        print("1. UPDATE INFORMATION")
+        print("2. DISPLAY ALL INFORMATION")
+        print("3. DELETE INFORMATION")
+        print("0. EXIT")
+        while True:
+            option = int(input("Enter the option: "))
+            if option == 1:
+                update()
+            elif option == 2:
+                display()
+            elif option == 3:
+                delete()
+            elif option == 0:
+                print("THANK YOU")
+                break
+            else:
+                print("Enter a valid option","\n")
+    else:
+        print("Enter the correct login id and password")
+
+else:
+    option = input("Do you already have an account? (y/n): ")
+    if option in 'yY':
+        login_id = input("Enter the login id: ")
+        password = input("Enter your password: ")
+        if login_id == 'USER' and password == '21aadhar':
+            print("----you have successfully logged in----")
+            print("****WELCOME USER****")
+            print("1. DISPLAY YOUR INFORMATION")
+            print("2. ADD A PARTICULAR INFORMATION")
+            print("0. EXIT")
+            while True:
+                option = int(input("Enter the option: "))
+                if option == 1:
+                    search()
+                    print(" ")
+                elif option == 2:
+                    add()
+                    print(" ")
+                elif option == 0:
+                    print("THANK YOU")
+                    break
+                else:
+                    print("Enter a valid option","\n")
+        else:
+            print("Invalid login id or password.")
+    else:
+        print("CREATE A NEW ACCOUNT")
+        login_id = input("Create a new login id: ")
+        password = input("Create a new password: ")
+        create()
+        print("THANK YOU")
+
+# Close the database connection when done
+conn.close()
+# Make sure to replace "your_host", "your_user", and "your_password" with your MySQL server's host, username, and password. 
+# Additionally, create a MySQL database named "aadhar_db" before running the script.
+
             
             
                     
